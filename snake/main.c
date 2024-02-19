@@ -12,8 +12,9 @@
 #include "snake.h"
 
 int main(int argc, const char * argv[]) {
-    int rows = 10, cols = 20, initial_length = 1;;
+    int rows = 5, cols = 10, initial_length = 1, foodCount = 0;
     time_t t;
+    char control_button = '\0';
     // snake initialization
     Snake_segment *snake_body = malloc(initial_length * sizeof(Snake_segment));
     snake_body[0].snake_x = rows / 2; //
@@ -28,16 +29,38 @@ int main(int argc, const char * argv[]) {
             board_matrix[i][j] = 0;
         }
     }
-    srand((unsigned) time(&t)); //rand seed
     
-    
-    int row = myRand(1, rows - 2);
-    int col = myRand(1, rows - 2);
-    board_matrix[row][col] = 1;
-    
+    if (foodCount < 2){
+        int row = myRand(1, rows - 2);
+        int col = myRand(1, rows - 2);
+        board_matrix[row][col] = 1;
+    }
 
-    printBoard(board_matrix, rows, cols, initial_length, snake_body);
-    printf("%d and %d", snake_body[0].snake_x, snake_body[0].snake_y);
+    
+    while (control_button != 'q') {
+        srand((unsigned) time(&t)); //rand seed
+        
+        printBoard(board_matrix, rows, cols, initial_length, snake_body, &foodCount);
+        scanf("%c", &control_button);
+        snakeMovement(control_button, snake_body, initial_length);
+
+        fflush(stdin);
+        if (board_matrix[snake_body[0].snake_x][snake_body[0].snake_y] == 1) {
+            Snake_segment * snake_body = realloc(snake_body, sizeof(Snake_segment) * initial_length);
+            if (snake_body == NULL) {
+                return 0;
+            }
+            else {
+                printf("eat\n");
+                board_matrix[snake_body[0].snake_x][snake_body[0].snake_y] = 0;
+                snake_body[initial_length].snake_x = snake_body[initial_length - 1].snake_x;
+                snake_body[initial_length].snake_y = snake_body[initial_length - 1].snake_y;
+            }
+        }
+        printf("Current- %d, x- %d, y- %d\n", board_matrix[snake_body[0].snake_x][snake_body[0].snake_y],snake_body[0].snake_x, snake_body[0].snake_y);
+    }
+    free(board_matrix);
+    free(snake_body);
 }
 
 
